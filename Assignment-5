@@ -1,0 +1,263 @@
+# 🧪 Performance Lab – Test, Analyze, Optimize
+
+# Problem 1: Find Most Frequent Element
+
+def most_frequent(numbers):
+    counts = {}
+
+    for number in numbers:
+        if number in counts:
+            counts[number] += 1
+        else:
+            counts[number] = 1
+
+    most_common = None
+    highest_count = 0
+
+    for number, count in counts.items():
+        if count > highest_count:
+            highest_count = count
+            most_common = number
+
+    return most_common
+
+
+"""
+Time and Space Analysis for problem 1:
+
+- Best-case: O(n)
+  We still need to look through all of the numbers to count them.
+
+- Worst-case: O(n)
+  Every number must be checked and added to or updated in the dictionary.
+
+- Average-case: O(n)
+  Dictionary lookups and updates usually take O(1), so going through
+  the entire list takes O(n).
+
+- Space complexity: O(n)
+  In the worst case, every number is different, so the dictionary
+  could contain n different entries.
+
+- Why this approach?
+  I used a dictionary because it makes it easy to keep track of how
+  many times each number occurs.
+
+- Could it be optimized?
+  This is already efficient because every number has to be checked
+  at least once.
+"""
+
+assert most_frequent([1, 3, 2, 3, 4, 1, 3]) == 3
+assert most_frequent([5, 5, 5, 2, 2]) == 5
+assert most_frequent([10]) == 10
+
+
+# Problem 2: Remove Duplicates While Preserving Order
+
+def remove_duplicates(nums):
+    seen = set()
+    result = []
+
+    for number in nums:
+        if number not in seen:
+            seen.add(number)
+            result.append(number)
+
+    return result
+
+
+"""
+Time and Space Analysis for problem 2:
+
+- Best-case: O(n)
+  We still go through every element in the list.
+
+- Worst-case: O(n)
+  Each value is checked once. Set lookups and additions are normally O(1).
+
+- Average-case: O(n)
+  We make one pass through the input list.
+
+- Space complexity: O(n)
+  The set and result list can both grow based on the number of unique values.
+
+- Why this approach?
+  I used a set to quickly determine if a value has already been seen.
+  I also used a list so the original order is preserved.
+
+- Could it be optimized?
+  We could avoid the set and only use the result list, which would save
+  some memory. However, checking a list could make runtime O(n^2).
+"""
+
+assert remove_duplicates([4, 5, 4, 6, 5, 7]) == [4, 5, 6, 7]
+assert remove_duplicates([1, 1, 1]) == [1]
+assert remove_duplicates([]) == []
+assert remove_duplicates([1, 2, 3]) == [1, 2, 3]
+
+
+# Problem 3: Return All Pairs That Sum to Target
+
+# Original approach:
+#
+# def find_pairs_original(nums, target):
+#     pairs = []
+#     for i in range(len(nums)):
+#         for j in range(i + 1, len(nums)):
+#             if nums[i] + nums[j] == target:
+#                 pairs.append((nums[i], nums[j]))
+#     return pairs
+#
+# This works but has O(n^2) time complexity because of the nested loops.
+
+def find_pairs(nums, target):
+    seen = set()
+    pairs = []
+
+    for number in nums:
+        needed = target - number
+
+        if needed in seen:
+            pairs.append((needed, number))
+
+        seen.add(number)
+
+    return pairs
+
+
+"""
+Time and Space Analysis for problem 3:
+
+- Best-case: O(n)
+  The function makes one pass through the list.
+
+- Worst-case: O(n)
+  Each number is processed once, with expected O(1) set lookups.
+
+- Average-case: O(n)
+  The set lets us quickly check whether the needed number was already seen.
+
+- Space complexity: O(n)
+  The set can contain up to n values, plus the output pairs.
+
+- Why this approach?
+  I used a set because it lets me check for the needed number without
+  using a second loop.
+
+- Could it be optimized?
+  This is the solution I chose to optimize for the assignment.
+
+  My original solution used nested loops and had O(n^2) time complexity
+  with O(1) extra working space, not counting output.
+
+  The optimized version uses a set and has expected O(n) time complexity.
+  The trade-off is O(n) additional space. This uses more memory but is
+  much faster for larger inputs.
+"""
+
+assert set(find_pairs([1, 2, 3, 4], 5)) == {(1, 4), (2, 3)}
+assert set(find_pairs([1, 2, 4, 7], 8)) == {(1, 7)}
+assert find_pairs([], 5) == []
+assert find_pairs([1, 2, 3], 10) == []
+
+
+# Problem 4: Simulate List Resizing (Amortized Cost)
+
+def add_n_items(n):
+    capacity = 1
+    size = 0
+    items = [None] * capacity
+
+    for value in range(n):
+        if size == capacity:
+            old_capacity = capacity
+            capacity *= 2
+            print("Resizing from", old_capacity, "to", capacity)
+
+            new_items = [None] * capacity
+
+            for i in range(size):
+                new_items[i] = items[i]
+
+            items = new_items
+
+        items[size] = value
+        size += 1
+
+    return items[:size]
+
+
+"""
+Time and Space Analysis for problem 4:
+
+- When do resizes happen?
+  A resize happens whenever the number of elements reaches the current
+  capacity. Capacity doubles from 1 to 2, 2 to 4, 4 to 8, and so on.
+
+- What is the worst-case for a single append?
+  O(n). During a resize, all existing elements have to be copied.
+
+- What is the amortized time per append overall?
+  O(1). Most appends do not require resizing, so the expensive copies
+  are spread across many inexpensive appends.
+
+- Space complexity:
+  O(n). The list capacity grows with the number of elements. During
+  resizing, both the old and new lists temporarily exist.
+
+- Why does doubling reduce the cost overall?
+  Doubling creates extra empty spaces, so the list does not need to
+  resize every time an item is added. This makes the amortized cost
+  per append O(1).
+"""
+
+assert add_n_items(0) == []
+assert add_n_items(1) == [0]
+assert add_n_items(6) == [0, 1, 2, 3, 4, 5]
+
+
+# Problem 5: Compute Running Totals
+
+def running_total(nums):
+    result = []
+    total = 0
+
+    for number in nums:
+        total += number
+        result.append(total)
+
+    return result
+
+
+"""
+Time and Space Analysis for problem 5:
+
+- Best-case: O(n)
+  Every number needs to be processed to create the output.
+
+- Worst-case: O(n)
+  We go through the input list exactly once.
+
+- Average-case: O(n)
+  Each element requires a constant amount of work.
+
+- Space complexity: O(n)
+  A new result list is created containing one value for each input value.
+
+- Why this approach?
+  I keep a running total instead of adding all previous values again
+  for every position.
+
+- Could it be optimized?
+  The time complexity is already O(n), which is optimal because each
+  number has to be processed. Space could be reduced by modifying the
+  original list, but that would change the input.
+"""
+
+assert running_total([1, 2, 3, 4]) == [1, 3, 6, 10]
+assert running_total([5]) == [5]
+assert running_total([]) == []
+assert running_total([2, 2, 2]) == [2, 4, 6]
+
+print("\nAll tests passed!")
